@@ -114,7 +114,7 @@
             this.tboxNamepase.Name = "tboxNamepase";
             this.tboxNamepase.Size = new System.Drawing.Size(124, 21);
             this.tboxNamepase.TabIndex = 7;
-            this.tboxNamepase.Text = "Ibert";
+            this.tboxNamepase.Text = "Kangaroo";
             // 
             // label4
             // 

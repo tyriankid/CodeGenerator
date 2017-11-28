@@ -17,7 +17,6 @@ namespace CodeGenerator
         internal static void CreateModelClass(DataTable dataTable, string tablemark, string path, string targetNamespace = "Bigeer")
         {
             string className = dataTable.TableName.ToString() + "Entity";
-            targetNamespace += ".Model";
 
             //创建类文件
             StreamWriter streamWriter = new StreamWriter(path + className + ".cs");
@@ -26,7 +25,7 @@ namespace CodeGenerator
             streamWriter.WriteLine("using System.Data;");
             streamWriter.WriteLine("using System.Collections;");
             streamWriter.WriteLine();
-            streamWriter.WriteLine("namespace " + targetNamespace + " {");
+            streamWriter.WriteLine("namespace Hidistro.Entities." + targetNamespace + " {");
 
             streamWriter.WriteLine("\t/// <summary>");
             streamWriter.WriteLine("\t/// " + tablemark + "-实体类");//管理员-实体类
@@ -117,11 +116,12 @@ namespace CodeGenerator
             streamWriter.WriteLine("using System.Data.SqlClient;");
             streamWriter.WriteLine("using System.Linq;");
             streamWriter.WriteLine("using System.Text;");
-            streamWriter.WriteLine("using " + targetNamespace + ".Model;");
-            streamWriter.WriteLine("using YH.DataAccess;");
-            streamWriter.WriteLine("using YH.Utility;");
+            streamWriter.WriteLine("using Hidistro.Core;");
+            streamWriter.WriteLine("using Hidistro.Core.Entities;");
+            streamWriter.WriteLine("using Hidistro.Entities." + targetNamespace + ";");
+            streamWriter.WriteLine("using Hidistro.Entities;");
             streamWriter.WriteLine();
-            streamWriter.WriteLine("namespace " + targetNamespace + ".Dal");
+            streamWriter.WriteLine("namespace Hidistro.SqlDal." + targetNamespace );
             streamWriter.WriteLine("{");
 
             streamWriter.WriteLine("\t/// <summary>");
@@ -137,10 +137,10 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据主键查询数据集");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static DataTable LoadData(Guid ID, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static DataTable LoadData(Guid ID)");
             streamWriter.WriteLine("\t\t{");
             streamWriter.WriteLine("\t\t\tstring selectSql = string.Format(@\"Select * From " + tableName + " Where " + keyname + "='{0}'\", ID);");
-            streamWriter.WriteLine("\t\t\tDataSet ds = DataAccessFactory.GetDataProvider(DbServers.GetCurrentDB(currDbName)).GetDataset(selectSql);");
+            streamWriter.WriteLine("\t\t\tDataSet ds = DataAccessFactory.GetDataProvider().GetDataset(selectSql);");
             streamWriter.WriteLine("\t\t\tds.Tables[0].TableName = \"" + tableName + "\";");
             streamWriter.WriteLine("\t\t\tds.Tables[0].PrimaryKey = new DataColumn[] { ds.Tables[0].Columns[\"" + keyname + "\"] };");
             streamWriter.WriteLine("\t\t\treturn ds.Tables[0];");
@@ -151,10 +151,10 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据主键查询数据实体");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static " + tableName + "Entity LoadEntity(Guid ID, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static " + tableName + "Entity LoadEntity(Guid ID)");
             streamWriter.WriteLine("\t\t{");
             streamWriter.WriteLine("\t\t\tstring selectSql = string.Format(@\"Select * From " + tableName + " Where " + keyname + "='{0}'\", ID);");
-            streamWriter.WriteLine("\t\t\tusing (IDataReader reader = DataAccessFactory.GetDataProvider(DbServers.GetCurrentDB(currDbName)).GetReader(selectSql))");
+            streamWriter.WriteLine("\t\t\tusing (IDataReader reader = DataAccessFactory.GetDataProvider().GetReader(selectSql))");
             streamWriter.WriteLine("\t\t\t{");
             streamWriter.WriteLine("\t\t\t\treturn ReaderConvert.ReaderToModel<" + tableName + "Entity>(reader);");
             streamWriter.WriteLine("\t\t\t}");
@@ -165,12 +165,12 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据条件查询数据集");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static DataTable SelectListData(string where = null, string selectFields =\"*\", string orderby = null, int top = 0, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static DataTable SelectListData(string where = null, string selectFields =\"*\", string orderby = null, int top = 0)");
             streamWriter.WriteLine("\t\t{");
             streamWriter.WriteLine("\t\t\tif (!string.IsNullOrEmpty(where)) where = \" Where \" + where;");
             streamWriter.WriteLine("\t\t\tstring selectSql = string.Format(@\"Select {2} {1} From " + tableName + " {0}\", where, selectFields, top == 0 ? \"\" : \"top \" + top);");
             streamWriter.WriteLine("\t\t\tif (!string.IsNullOrEmpty(orderby)) selectSql += \" Order By \" + orderby;");
-            streamWriter.WriteLine("\t\t\tDataSet ds = DataAccessFactory.GetDataProvider(DbServers.GetCurrentDB(currDbName)).GetDataset(selectSql);");
+            streamWriter.WriteLine("\t\t\tDataSet ds = DataAccessFactory.GetDataProvider().GetDataset(selectSql);");
             streamWriter.WriteLine("\t\t\tds.Tables[0].TableName = \"" + tableName + "\";");
             streamWriter.WriteLine("\t\t\tds.Tables[0].PrimaryKey = new DataColumn[] { ds.Tables[0].Columns[\"" + keyname + "\"] };");
             streamWriter.WriteLine("\t\t\treturn ds.Tables[0];");
@@ -181,12 +181,12 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据条件查询首行首列");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static object SelectScalar(string where = null, string selectFields =\"*\", string orderby = null, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static object SelectScalar(string where = null, string selectFields =\"*\", string orderby = null)");
             streamWriter.WriteLine("\t\t{");
             streamWriter.WriteLine("\t\t\tif (!string.IsNullOrEmpty(where)) where = \" Where \" + where;");
             streamWriter.WriteLine("\t\t\tstring selectSql = string.Format(@\"Select {1} From " + tableName + " {0}\", where, selectFields);");
             streamWriter.WriteLine("\t\t\tif (!string.IsNullOrEmpty(orderby)) selectSql += \" Order By \" + orderby;");
-            streamWriter.WriteLine("\t\t\treturn DataAccessFactory.GetDataProvider(DbServers.GetCurrentDB(currDbName)).GetScalar(selectSql);");
+            streamWriter.WriteLine("\t\t\treturn DataAccessFactory.GetDataProvider().GetScalar(selectSql);");
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
@@ -194,12 +194,12 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据条件查询数据实体");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static IList<" + tableName + "Entity> SelectListEntity(string where = null, string selectFields =\"*\", string orderby = null, int top = 0, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static IList<" + tableName + "Entity> SelectListEntity(string where = null, string selectFields =\"*\", string orderby = null, int top = 0)");
             streamWriter.WriteLine("\t\t{");
             streamWriter.WriteLine("\t\t\tif (!string.IsNullOrEmpty(where)) where = \" Where \" + where;");
             streamWriter.WriteLine("\t\t\tstring selectSql = string.Format(@\"Select {2} {1} From " + tableName + " {0}\", where, selectFields, top == 0 ? \"\" : \"top \" + top);");
             streamWriter.WriteLine("\t\t\tif (!string.IsNullOrEmpty(orderby)) selectSql += \" Order By \" + orderby;");
-            streamWriter.WriteLine("\t\t\tusing (IDataReader reader = DataAccessFactory.GetDataProvider(DbServers.GetCurrentDB(currDbName)).GetReader(selectSql))");
+            streamWriter.WriteLine("\t\t\tusing (IDataReader reader = DataAccessFactory.GetDataProvider().GetReader(selectSql))");
             streamWriter.WriteLine("\t\t\t{");
             streamWriter.WriteLine("\t\t\t\treturn ReaderConvert.ReaderToList<" + tableName + "Entity>(reader);");
             streamWriter.WriteLine("\t\t\t}");
@@ -210,10 +210,10 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据主键删除");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static void Del(Guid ID, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static void Del(Guid ID)");
             streamWriter.WriteLine("\t\t{");
             streamWriter.WriteLine("\t\t\tstring deleteSql = string.Format(@\"Delete From " + tableName + " Where " + keyname + "='{0}'\", ID);");
-            streamWriter.WriteLine("\t\t\tDataAccessFactory.GetDataProvider(DbServers.GetCurrentDB(currDbName)).Execute(deleteSql);");
+            streamWriter.WriteLine("\t\t\tDataAccessFactory.GetDataProvider().Execute(deleteSql);");
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
@@ -221,11 +221,11 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据条件删除");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static void DelListData(string where = null, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static void DelListData(string where = null)");
             streamWriter.WriteLine("\t\t{");
             streamWriter.WriteLine("\t\t\tif (!string.IsNullOrEmpty(where)) where = \" Where \" + where;");
             streamWriter.WriteLine("\t\t\tstring deleteSql = string.Format(@\"Delete From " + tableName + " {0}\", where);");
-            streamWriter.WriteLine("\t\t\tDataAccessFactory.GetDataProvider(DbServers.GetCurrentDB(currDbName)).Execute(deleteSql);");
+            streamWriter.WriteLine("\t\t\tDataAccessFactory.GetDataProvider().Execute(deleteSql);");
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
@@ -249,7 +249,7 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 保存数据");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static bool SaveEntity(" + tableName + "Entity entity, bool isAdd, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static bool SaveEntity(" + tableName + "Entity entity, bool isAdd)");
             streamWriter.WriteLine("\t\t{");
             streamWriter.WriteLine("\t\t\ttry");
             streamWriter.WriteLine("\t\t\t{");
@@ -282,7 +282,7 @@ namespace CodeGenerator
                 
             }
             streamWriter.WriteLine("\t\t\t\t};");
-            streamWriter.WriteLine("\t\t\t\tDataAccessFactory.GetDataProvider(DbServers.GetCurrentDB(currDbName)).Execute(execSql, para);");
+            streamWriter.WriteLine("\t\t\t\tDataAccessFactory.GetDataProvider().Execute(execSql, para);");
             streamWriter.WriteLine("\t\t\t\treturn true;");
             streamWriter.WriteLine("\t\t\t}");
             streamWriter.WriteLine("\t\t\tcatch");
@@ -318,13 +318,12 @@ namespace CodeGenerator
             streamWriter.WriteLine("using System.Data;");
             streamWriter.WriteLine("using System.Linq;");
             streamWriter.WriteLine("using System.Text;");
-            streamWriter.WriteLine("using " + targetNamespace + ".Common;");
-            streamWriter.WriteLine("using " + targetNamespace + ".Dal;");
-            streamWriter.WriteLine("using " + targetNamespace + ".Model;");
-            streamWriter.WriteLine("using YH.Utility;");
+            streamWriter.WriteLine("using Hidistro.SqlDal." + targetNamespace + ";");
+            streamWriter.WriteLine("using Hidistro.Entities." + targetNamespace + ";");
+            streamWriter.WriteLine("using Hidistro.Core.Entities;");
             //streamWriter.WriteLine("using Bigeer.Plugin;");
             streamWriter.WriteLine();
-            streamWriter.WriteLine("namespace " + targetNamespace + ".Bll");
+            streamWriter.WriteLine("namespace Hidistro.ControlPanel." + targetNamespace );
             streamWriter.WriteLine("{");
 
             streamWriter.WriteLine("\t/// <summary>");
@@ -337,16 +336,11 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据主键加载" + tablemark + "数据集");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static DataTable LoadData(Guid ID, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static DataTable LoadData(Guid ID)");
             streamWriter.WriteLine("\t\t{");
-            streamWriter.WriteLine("\t\t\tif (Globals.GetMasterSettings().OpenCacheServer)");
-            streamWriter.WriteLine("\t\t\t{");
-            streamWriter.WriteLine("\t\t\t\treturn null;    //后续扩冲： 开启缓存服务器后，从缓存服务器拿取数据");
-            streamWriter.WriteLine("\t\t\t}");
-            streamWriter.WriteLine("\t\t\telse");
-            streamWriter.WriteLine("\t\t\t{");
-            streamWriter.WriteLine("\t\t\t\treturn " + tableName + "Manager.LoadData(ID, currDbName);");
-            streamWriter.WriteLine("\t\t\t}");
+
+            streamWriter.WriteLine("\t\t\t\treturn " + tableName + "Manager.LoadData(ID);");
+
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
@@ -354,9 +348,9 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据主键加载" + tablemark + "实体");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static " + tableName + "Entity LoadEntity(Guid ID, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static " + tableName + "Entity LoadEntity(Guid ID)");
             streamWriter.WriteLine("\t\t{");
-            streamWriter.WriteLine("\t\t\t\treturn " + tableName + "Manager.LoadEntity(ID, currDbName);");
+            streamWriter.WriteLine("\t\t\t\treturn " + tableName + "Manager.LoadEntity(ID);");
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
@@ -364,9 +358,9 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据条件查询" + tablemark + "数据集");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static DataTable GetListData(string where = null, string selectFields =\"*\", string orderby = null, int top = 0, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static DataTable GetListData(string where = null, string selectFields =\"*\", string orderby = null, int top = 0)");
             streamWriter.WriteLine("\t\t{");
-            streamWriter.WriteLine("\t\t\treturn " + tableName + "Manager.SelectListData(where,selectFields,orderby,top, currDbName);");
+            streamWriter.WriteLine("\t\t\treturn " + tableName + "Manager.SelectListData(where,selectFields,orderby,top);");
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
@@ -374,9 +368,9 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据条件查询" + tablemark + "首行首列");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static object GetScalar(string where = null, string selectFields =\"*\", string orderby = null, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static object GetScalar(string where = null, string selectFields =\"*\", string orderby = null)");
             streamWriter.WriteLine("\t\t{");
-            streamWriter.WriteLine("\t\t\treturn " + tableName + "Manager.SelectScalar(where,selectFields,orderby, currDbName);");
+            streamWriter.WriteLine("\t\t\treturn " + tableName + "Manager.SelectScalar(where,selectFields,orderby);");
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
@@ -384,9 +378,9 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据条件查询" + tablemark + "数据实体");
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static IList<" + tableName + "Entity> GetListEntity(string where = null, string selectFields =\"*\", string orderby = null, int top = 0, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static IList<" + tableName + "Entity> GetListEntity(string where = null, string selectFields =\"*\", string orderby = null, int top = 0)");
             streamWriter.WriteLine("\t\t{");
-            streamWriter.WriteLine("\t\t\t\treturn " + tableName + "Manager.SelectListEntity(where,selectFields,orderby,top, currDbName);");
+            streamWriter.WriteLine("\t\t\t\treturn " + tableName + "Manager.SelectListEntity(where,selectFields,orderby,top);");
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
@@ -394,9 +388,9 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据主键删除" + tablemark);
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static void Del(Guid ID, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static void Del(Guid ID)");
             streamWriter.WriteLine("\t\t{");
-            streamWriter.WriteLine("\t\t\t" + tableName + "Manager.Del(ID, currDbName);");
+            streamWriter.WriteLine("\t\t\t" + tableName + "Manager.Del(ID);");
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
@@ -404,9 +398,9 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 根据条件删除" + tablemark);
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static void DelListData(string where = null, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static void DelListData(string where = null)");
             streamWriter.WriteLine("\t\t{");
-            streamWriter.WriteLine("\t\t\t" + tableName + "Manager.DelListData(where, currDbName);");
+            streamWriter.WriteLine("\t\t\t" + tableName + "Manager.DelListData(where);");
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
@@ -414,9 +408,9 @@ namespace CodeGenerator
             streamWriter.WriteLine("\t\t/// <summary>");
             streamWriter.WriteLine("\t\t/// 保存" + tablemark);
             streamWriter.WriteLine("\t\t/// </summary>");
-            streamWriter.WriteLine("\t\tpublic static bool SaveEntity(" + tableName + "Entity entity, bool isAdd, DbServers.DbServerName currDbName = DbServers.DbServerName.LatestDB)");
+            streamWriter.WriteLine("\t\tpublic static bool SaveEntity(" + tableName + "Entity entity, bool isAdd)");
             streamWriter.WriteLine("\t\t{");
-            streamWriter.WriteLine("\t\t\treturn " + tableName + "Manager.SaveEntity(entity, isAdd, currDbName);");
+            streamWriter.WriteLine("\t\t\treturn " + tableName + "Manager.SaveEntity(entity, isAdd);");
             streamWriter.WriteLine("\t\t}");
             streamWriter.WriteLine();
 
